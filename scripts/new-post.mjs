@@ -37,8 +37,19 @@ try {
   ).toLowerCase() === 'y';
 
   const now = new Date();
-  const date = now.toISOString().slice(0, 10);
   const id = `post_${Date.now()}`;
+  const locked = (
+    await ask('Password-protect this post? y/N', 'n')
+  ).toLowerCase() === 'y';
+  const passwordEnv = locked
+    ? await ask('Password environment variable name', `POST_PASSWORD_${id.slice(5)}`)
+    : undefined;
+
+  if (passwordEnv && !/^[A-Za-z_][A-Za-z0-9_]*$/.test(passwordEnv)) {
+    throw new Error('Use a valid environment variable name (letters, numbers, and underscores).');
+  }
+
+  const date = now.toISOString().slice(0, 10);
 
   const slugBase = (titleEn || titleAr)
     .normalize('NFKD')
@@ -66,6 +77,8 @@ try {
     `category: ${yaml(category)}`,
     `createdAt: ${yaml(now.toISOString())}`,
     `updatedAt: ${yaml(now.toISOString())}`,
+    `locked: ${locked}`,
+    ...(passwordEnv ? [`passwordEnv: ${yaml(passwordEnv)}`] : []),
     '---',
     '',
     'اكتب نص المقال هنا.',
@@ -85,6 +98,10 @@ try {
 
   console.log(`\nCreated: ${filePath}`);
   console.log(`Status: ${status}`);
+  if (passwordEnv) {
+    console.log(`Password protection: enabled (${passwordEnv})`);
+    console.log('Set this environment variable in Vercel before building the site.');
+  }
 
   const editor = spawn('code', ['-r', filePath], {
     stdio: 'ignore',

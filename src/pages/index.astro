@@ -34,7 +34,7 @@ const featuredPost = posts[0];
 
     {featuredPost && (
       <a class="featured-post" href={`/post/${featuredPost.data.id}`}>
-        <span class="featured-label">أحدث مقال</span>
+        <span class="featured-label">{featuredPost.data.locked ? 'مقال محمي بكلمة مرور' : 'أحدث مقال'}</span>
         <span class="featured-content">
           <span class="featured-kicker">أحدث ما كُتب · {formatDate(featuredPost.data.date)}</span>
           <span class="featured-title">{featuredPost.data.titleAr || featuredPost.data.titleEn}</span>
@@ -62,6 +62,7 @@ const featuredPost = posts[0];
               </time>
               <span aria-hidden="true">·</span>
               <span class="post-category">{post.data.category}</span>
+              {post.data.locked && <span class="post-lock">محمي بكلمة مرور</span>}
             </div>
 
             <h3>{post.data.titleAr || post.data.titleEn}</h3>

@@ -23,6 +23,16 @@ const blog = defineCollection({
     category: z.string().default('عام'),
     createdAt: z.string().optional(),
     updatedAt: z.string().optional(),
+    locked: z.boolean().default(false),
+    passwordEnv: z.string().optional(),
+  }).superRefine((data, context) => {
+    if (data.locked && !data.passwordEnv) {
+      context.addIssue({
+        code: 'custom',
+        path: ['passwordEnv'],
+        message: 'Locked posts must name the environment variable holding their password.',
+      });
+    }
   }),
 });
 

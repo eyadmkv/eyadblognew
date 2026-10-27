@@ -9,7 +9,8 @@ interface Props {
   image?: string;
   publishedTime?: string;
   modifiedTime?: string;
-  structuredData?: Record<string, unknown>;
+  structuredData?: Record<string, unknown> | null;
+  robots?: string;
 }
 
 const siteName = 'إياد اللامع، وقد انطفأ';
@@ -23,6 +24,7 @@ const {
   publishedTime,
   modifiedTime,
   structuredData,
+  robots = 'index, follow',
 } = Astro.props;
 const isHome = Astro.url.pathname === '/';
 const isAbout = Astro.url.pathname === '/about';
@@ -43,7 +45,7 @@ const websiteData = {
     <meta name="generator" content={Astro.generator} />
     <meta name="description" content={description} />
     <meta name="author" content={`${authorName}، المعروف باسم إياد محمد جاويش`} />
-    <meta name="robots" content="index, follow" />
+    <meta name="robots" content={robots} />
     <meta name="google-site-verification" content="JftKppJDUMtSRZKLTsjaVTzGs8JS4EBGMBIYJqH73uk" />
     <meta name="theme-color" content="#151513" />
     <link rel="canonical" href={canonical} />
@@ -70,7 +72,7 @@ const websiteData = {
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={image} />
     <title>{title}</title>
-    <script type="application/ld+json" set:html={JSON.stringify(structuredData ?? websiteData).replace(/</g, '\\u003c')} />
+    {structuredData !== null && <script type="application/ld+json" set:html={JSON.stringify(structuredData ?? websiteData).replace(/</g, '\\u003c')} />}
   </head>
   <body>
     <header class="site-header">

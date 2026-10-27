@@ -799,6 +799,49 @@ body { background: var(--paper); }
 .site-footer { background: transparent; border-top: 1px solid var(--line); }
 .footer-inner { min-height: 82px; }
 
+.locked-post {
+  max-width: 650px;
+  margin: 40px auto;
+  padding: 28px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+.post-lock { color: var(--accent); font-size: 11px; }
+.locked-form label { display: block; margin-bottom: 10px; font-weight: 600; }
+.locked-form-row { display: flex; gap: 10px; }
+.locked-form input {
+  min-width: 0;
+  flex: 1;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+}
+.locked-form button {
+  padding: 10px 18px;
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: #151513;
+  font: inherit;
+  cursor: pointer;
+}
+.locked-form button:disabled { cursor: wait; opacity: .65; }
+.locked-form input:focus-visible, .locked-form button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.locked-status { min-height: 1.5em; margin: 10px 0 0; color: var(--accent); font-size: 14px; }
+.locked-content { max-width: none; margin: 0; padding: 0; border: 0; background: transparent; }
+.locked-content h2 { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
+.locked-content h2:focus { position: static; width: auto; height: auto; clip: auto; margin-bottom: 20px; }
+
+@media (max-width: 520px) {
+  .locked-post { margin: 26px 16px; padding: 20px; }
+  .locked-form-row { flex-direction: column; }
+}
+
 @media (max-width: 700px) {
   .page-shell { width: calc(100% - 36px); }
   .header-inner, .footer-inner { width: calc(100% - 36px); }
