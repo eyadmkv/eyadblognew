@@ -1,0 +1,89 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+  canonical?: string;
+  type?: 'website' | 'article';
+  image?: string;
+  publishedTime?: string;
+  modifiedTime?: string;
+  structuredData?: Record<string, unknown>;
+}
+
+const siteName = 'إياد اللامع، وقد انطفأ';
+const authorName = 'إياد محمد حلمي';
+const {
+  title = siteName,
+  description = 'أرشيف كتابي ومدونة تأملية فلسفية مخصصة للكاتب إياد محمد حلمي، تشمل واجهة مخصصة للمطالعة الهادئة والتصنيفات والتعليقات.',
+  canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url).href,
+  type = 'website',
+  image = new URL('/icon-512.png', Astro.site ?? Astro.url).href,
+  publishedTime,
+  modifiedTime,
+  structuredData,
+} = Astro.props;
+const isHome = Astro.url.pathname === '/';
+const isAbout = Astro.url.pathname === '/about';
+const websiteData = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: siteName,
+  url: new URL('/', Astro.site ?? Astro.url).href,
+  inLanguage: 'ar',
+  author: { '@type': 'Person', name: authorName, alternateName: 'إياد محمد جاويش' },
+};
+---
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="description" content={description} />
+    <meta name="author" content={authorName} />
+    <meta name="robots" content="index, follow" />
+    <meta name="google-site-verification" content="JftKppJDUMtSRZKLTsjaVTzGs8JS4EBGMBIYJqH73uk" />
+    <meta name="theme-color" content="#151513" />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="alternate icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" href="/favicon/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="alternate" type="application/rss+xml" title={`${siteName} — RSS`} href="/rss.xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <meta property="og:locale" content="ar_AR" />
+    <meta property="og:site_name" content={siteName} />
+    <meta property="og:type" content={type} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={image} />
+    {type === 'article' && publishedTime && <meta property="article:published_time" content={publishedTime} />}
+    {type === 'article' && modifiedTime && <meta property="article:modified_time" content={modifiedTime} />}
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={image} />
+    <title>{title}</title>
+    <script type="application/ld+json" set:html={JSON.stringify(structuredData ?? websiteData).replace(/</g, '\\u003c')} />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand" href="/" aria-label="العودة إلى الأرشيف الرئيسي">
+          <span><span class="brand-name">{siteName}</span><span class="brand-subtitle">أرشيف الكتابة والتأمل</span></span>
+        </a>
+        <nav class="site-nav" aria-label="التنقل الرئيسي">
+          <a href="/" aria-current={isHome ? 'page' : undefined}>الأرشيف</a>
+          <a href="/about" aria-current={isAbout ? 'page' : undefined}>من أنا؟</a>
+        </nav>
+      </div>
+    </header>
+    <main><slot /></main>
+    <footer class="site-footer"><div class="footer-inner"><span>بقلم {authorName}</span><a href="/">العودة إلى الأرشيف</a></div></footer>
+  </body>
+</html>

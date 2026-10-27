@@ -1,0 +1,13 @@
+{
+  "short_name": "إياد اللامع",
+  "name": "إياد اللامع، وقد انطفأ",
+  "description": "أرشيف كتابي ومدونة تأملية فلسفية مخصصة للكاتب إياد محمد حلمي",
+  "icons": [
+    { "src": "/android-chrome-192x192.png", "type": "image/png", "sizes": "192x192" },
+    { "src": "/icon-512.png", "type": "image/png", "sizes": "512x512" }
+  ],
+  "start_url": "/",
+  "background_color": "#151513",
+  "theme_color": "#d97706",
+  "display": "standalone"
+}
