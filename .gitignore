@@ -24,3 +24,5 @@ pnpm-debug.log*
 .idea/
 posts_rows.csv
 .agents/skills/
+.vercel
+.env*
