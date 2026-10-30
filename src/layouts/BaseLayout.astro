@@ -38,7 +38,7 @@ const websiteData = {
 };
 ---
 <!doctype html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -47,16 +47,28 @@ const websiteData = {
     <meta name="author" content={`${authorName}، المعروف باسم إياد محمد جاويش`} />
     <meta name="robots" content={robots} />
     <meta name="google-site-verification" content="JftKppJDUMtSRZKLTsjaVTzGs8JS4EBGMBIYJqH73uk" />
-    <meta name="theme-color" content="#151513" />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="theme-color" content="#0e1116" />
+    <script is:inline>
+      (function () {
+        try {
+          var saved = localStorage.getItem('theme');
+          if (saved === 'light') {
+            document.documentElement.dataset.theme = 'light';
+            document.querySelector('meta[name="theme-color"]').setAttribute('content', '#f1f1ee');
+          }
+        } catch (e) {}
+      })();
+    </script>
     <link rel="canonical" href={canonical} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="alternate icon" href="/favicon.ico" />
-    <link rel="apple-touch-icon" href="/favicon/apple-touch-icon.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/manifest.json" />
     <link rel="alternate" type="application/rss+xml" title={`${siteName} — RSS`} href="/rss.xml" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Noto+Naskh+Arabic:wght@400;500;600&display=swap" rel="stylesheet" />
     <meta property="og:locale" content="ar_AR" />
     <meta property="og:site_name" content={siteName} />
     <meta property="og:type" content={type} />
@@ -75,18 +87,71 @@ const websiteData = {
     {structuredData !== null && <script type="application/ld+json" set:html={JSON.stringify(structuredData ?? websiteData).replace(/</g, '\\u003c')} />}
   </head>
   <body>
+    <a class="skip-link" href="#main">انتقل إلى المحتوى</a>
     <header class="site-header">
       <div class="header-inner">
         <a class="brand" href="/" aria-label="العودة إلى الأرشيف الرئيسي">
-          <span><span class="brand-name">{siteName}</span><span class="brand-subtitle">أرشيف الكتابة والتأمل</span></span>
+          <span class="brand-ember" aria-hidden="true"></span>
+          <span class="brand-text">
+            <span class="brand-name">{siteName}</span>
+            <span class="brand-subtitle">أرشيف الكتابة والتأمل</span>
+          </span>
         </a>
-        <nav class="site-nav" aria-label="التنقل الرئيسي">
-          <a href="/" aria-current={isHome ? 'page' : undefined}>الأرشيف</a>
-          <a href="/about" aria-current={isAbout ? 'page' : undefined}>من أنا؟</a>
-        </nav>
+        <div class="header-tools">
+          <nav class="site-nav" aria-label="التنقل الرئيسي">
+            <a href="/" aria-current={isHome ? 'page' : undefined}>الأرشيف</a>
+            <a href="/about" aria-current={isAbout ? 'page' : undefined}>من أنا؟</a>
+          </nav>
+          <button class="theme-toggle" type="button" data-theme-toggle aria-label="تفعيل المظهر الفاتح">
+            <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="4" />
+              <path d="M12 2.5v2.2M12 19.3v2.2M4.9 4.9l1.6 1.6M17.5 17.5l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.9 19.1l1.6-1.6M17.5 6.5l1.6-1.6" />
+            </svg>
+            <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5a8.5 8.5 0 1 0 10.7 10.7Z" />
+            </svg>
+          </button>
+        </div>
       </div>
     </header>
-    <main><slot /></main>
-    <footer class="site-footer"><div class="footer-inner"><span>بقلم {authorName}</span><a href="/">العودة إلى الأرشيف</a></div></footer>
+    <main id="main"><slot /></main>
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <div class="footer-brand">
+          <div>
+            <strong>{siteName}</strong>
+            <span>بقلم {authorName}</span>
+          </div>
+        </div>
+        <nav class="footer-nav" aria-label="روابط التذييل">
+          <a href="/">الأرشيف</a>
+          <a href="/about">من أنا؟</a>
+          <a href="/rss.xml">RSS</a>
+        </nav>
+      </div>
+    </footer>
+
+    <script>
+      const root = document.documentElement;
+      const toggle = document.querySelector<HTMLButtonElement>('[data-theme-toggle]');
+      const themeMeta = document.querySelector('meta[name="theme-color"]');
+
+      const sync = () => {
+        const dark = root.dataset.theme !== 'light';
+        toggle?.setAttribute('aria-label', dark ? 'تفعيل المظهر الفاتح' : 'تفعيل المظهر الداكن');
+        themeMeta?.setAttribute('content', dark ? '#0e1116' : '#f1f1ee');
+      };
+
+      toggle?.addEventListener('click', () => {
+        const next = root.dataset.theme === 'light' ? 'dark' : 'light';
+        root.dataset.theme = next;
+        try {
+          localStorage.setItem('theme', next);
+        } catch {}
+        sync();
+      });
+
+      sync();
+    </script>
   </body>
 </html>

@@ -1,0 +1,144 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { createCipheriv, pbkdf2Sync, randomBytes } from 'node:crypto';
+
+const keyDerivationIterations = 310_000;
+
+export async function getStaticPaths() {
+  const posts = await getCollection(
+    'blog',
+    ({ data }) => data.status === 'published'
+  );
+
+  return posts.map((post) => ({
+    params: { id: post.data.id },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const locked = post.data.locked;
+let Content;
+let encryptedPayload: string | undefined;
+
+if (locked) {
+  const passwordVariable = post.data.passwordEnv!;
+  const password = process.env[passwordVariable];
+  if (!password) {
+    throw new Error(`Set ${passwordVariable} in the build environment to encrypt post ${post.data.id}.`);
+  }
+
+  const salt = randomBytes(16);
+  const iv = randomBytes(12);
+  const key = pbkdf2Sync(password, salt, keyDerivationIterations, 32, 'sha256');
+  const cipher = createCipheriv('aes-256-gcm', key, iv);
+  const ciphertext = Buffer.concat([cipher.update(post.body, 'utf8'), cipher.final(), cipher.getAuthTag()]);
+
+  encryptedPayload = JSON.stringify({
+    version: 1,
+    iterations: keyDerivationIterations,
+    salt: salt.toString('base64'),
+    iv: iv.toString('base64'),
+    ciphertext: ciphertext.toString('base64'),
+  }).replace(/</g, '\\u003c');
+} else {
+  ({ Content } = await render(post));
+}
+
+const title = post.data.titleAr || post.data.titleEn;
+const description = post.data.excerptAr || post.data.excerptEn || title;
+const canonical = new URL(
+  `/post/${post.data.id}`,
+  Astro.site ?? Astro.url
+).href;
+const publishedDate = new Date(`${post.data.date}T00:00:00Z`).toISOString();
+const modifiedDate = new Date(post.data.updatedAt ?? post.data.date).toISOString();
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: title,
+  description,
+  url: canonical,
+  mainEntityOfPage: { '@type': 'WebPage', '@id': canonical },
+  datePublished: publishedDate,
+  dateModified: modifiedDate,
+  author: { '@type': 'Person', name: 'إياد محمد حلمي', alternateName: 'إياد محمد جاويش' },
+  publisher: { '@type': 'Person', name: 'إياد محمد حلمي', alternateName: 'إياد محمد جاويش' },
+  image: new URL('/icon-512.png', Astro.site ?? Astro.url).href,
+  inLanguage: 'ar',
+};
+
+const formattedDate = new Date(
+  `${post.data.date}T00:00:00Z`
+).toLocaleDateString('ar-EG', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+  timeZone: 'UTC',
+});
+---
+
+<BaseLayout
+  title={`${title} | إياد اللامع`}
+  description={description}
+  canonical={canonical}
+  type="article"
+  publishedTime={publishedDate}
+  modifiedTime={modifiedDate}
+  structuredData={locked ? null : structuredData}
+  robots={locked ? 'noindex, nofollow, noarchive' : 'index, follow'}
+>
+  <article class="reader">
+    <a class="back-link" href="/">العودة إلى الأرشيف ←</a>
+
+    <header class="reader-header">
+      <div class="post-meta">
+        <time datetime={post.data.date}>{formattedDate}</time>
+        <span aria-hidden="true">·</span>
+        <span>{post.data.readingTimeMin} دقائق للقراءة</span>
+      </div>
+
+      <h1>{title}</h1>
+
+      {post.data.excerptAr && (
+        <p class="reader-excerpt">{post.data.excerptAr}</p>
+      )}
+    </header>
+
+    {locked ? (
+      <section class="locked-post" data-locked-post>
+        <form class="locked-form" data-unlock-form>
+          <label for="post-password">كلمة مرور المقال</label>
+          <div class="locked-form-row">
+            <input id="post-password" name="password" type="password" autocomplete="current-password" aria-describedby="post-password-status" required />
+            <button type="submit">فتح المقال</button>
+          </div>
+          <p class="locked-status" id="post-password-status" data-unlock-status role="status" aria-live="polite"></p>
+        </form>
+        <script type="application/json" data-locked-payload set:html={encryptedPayload} />
+        <section class="prose locked-content" data-unlocked-content dir="rtl" hidden>
+          <h2 tabindex="-1" data-unlocked-heading>نص المقال</h2>
+          <div data-unlocked-body></div>
+        </section>
+        <script>
+          import '../../scripts/unlock-post.ts';
+        </script>
+      </section>
+    ) : (
+      <div class="prose" dir="rtl">
+        <Content />
+      </div>
+    )}
+
+    <div class="reader-tags">
+      {post.data.tags.map((tag) => (
+        <span class="tag">{tag.replaceAll('_', ' ')}</span>
+      ))}
+    </div>
+
+    <p class="post-meta" style="margin-top: 40px;">
+      بقلم إياد محمد حلمي
+    </p>
+  </article>
+</BaseLayout>

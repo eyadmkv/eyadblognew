@@ -6,18 +6,27 @@ import { createCipheriv, pbkdf2Sync, randomBytes } from 'node:crypto';
 const keyDerivationIterations = 310_000;
 
 export async function getStaticPaths() {
-  const posts = await getCollection(
+  const posts = (await getCollection(
     'blog',
     ({ data }) => data.status === 'published'
-  );
+  )).sort((a, b) => b.data.date.localeCompare(a.data.date));
 
-  return posts.map((post) => ({
+  const toLink = (entry?: (typeof posts)[number]) =>
+    entry
+      ? { id: entry.data.id, title: entry.data.titleAr || entry.data.titleEn, locked: entry.data.locked }
+      : null;
+
+  return posts.map((post, index) => ({
     params: { id: post.data.id },
-    props: { post },
+    props: {
+      post,
+      newer: toLink(posts[index - 1]),
+      older: toLink(posts[index + 1]),
+    },
   }));
 }
 
-const { post } = Astro.props;
+const { post, newer, older } = Astro.props;
 const locked = post.data.locked;
 let Content;
 let encryptedPayload: string | undefined;
@@ -77,6 +86,14 @@ const formattedDate = new Date(
   day: 'numeric',
   timeZone: 'UTC',
 });
+
+const minutes = post.data.readingTimeMin;
+const minutesLabel = (() => {
+  if (minutes === 1) return 'دقيقة واحدة';
+  if (minutes === 2) return 'دقيقتان';
+  const n = minutes.toLocaleString('ar-EG');
+  return minutes <= 10 ? `${n} دقائق` : `${n} دقيقة`;
+})();
 ---
 
 <BaseLayout
@@ -89,14 +106,17 @@ const formattedDate = new Date(
   structuredData={locked ? null : structuredData}
   robots={locked ? 'noindex, nofollow, noarchive' : 'index, follow'}
 >
-  <article class="reader">
-    <a class="back-link" href="/">العودة إلى الأرشيف ←</a>
+  <div class="read-progress" aria-hidden="true"><span data-progress></span></div>
+
+  <article class="reader" data-article>
+    <a class="back-link" href="/"><span class="arrow" aria-hidden="true">←</span> العودة إلى الأرشيف</a>
 
     <header class="reader-header">
-      <div class="post-meta">
+      <div class="reader-kicker">
+        <span class="reader-category">{post.data.category}</span>
         <time datetime={post.data.date}>{formattedDate}</time>
-        <span aria-hidden="true">·</span>
-        <span>{post.data.readingTimeMin} دقائق للقراءة</span>
+        <!--<span aria-hidden="true">·</span> -->
+      <!--<span>{minutesLabel} للقراءة</span> -->       
       </div>
 
       <h1>{title}</h1>
@@ -109,6 +129,18 @@ const formattedDate = new Date(
     {locked ? (
       <section class="locked-post" data-locked-post>
         <form class="locked-form" data-unlock-form>
+          <div class="locked-intro">
+            <span class="locked-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="4" y="11" width="16" height="10" rx="2" />
+                <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+              </svg>
+            </span>
+            <div>
+              <strong>هذا المقال محمي بكلمة مرور</strong>
+              <span>أدخل كلمة المرور ليُفتح النص هنا في متصفحك.</span>
+            </div>
+          </div>
           <label for="post-password">كلمة مرور المقال</label>
           <div class="locked-form-row">
             <input id="post-password" name="password" type="password" autocomplete="current-password" aria-describedby="post-password-status" required />
@@ -131,14 +163,62 @@ const formattedDate = new Date(
       </div>
     )}
 
-    <div class="reader-tags">
-      {post.data.tags.map((tag) => (
-        <span class="tag">{tag.replaceAll('_', ' ')}</span>
-      ))}
-    </div>
+    <footer class="reader-footer">
+      {post.data.tags.length > 0 && (
+        <ul class="tag-list" aria-label="الوسوم">
+          {post.data.tags.map((tag) => (
+            <li class="tag">{tag.replaceAll('_', ' ')}</li>
+          ))}
+        </ul>
+      )}
 
-    <p class="post-meta" style="margin-top: 40px;">
-      بقلم إياد محمد حلمي
-    </p>
+      <p class="reader-byline">
+        <span>بقلم <strong>إياد محمد حلمي</strong></span>
+      </p>
+
+      {(older || newer) && (
+        <nav class="post-nav" aria-label="مقالات أخرى">
+          {older && (
+            <a class="is-older" href={`/post/${older.id}`} rel="prev">
+              <span class="post-nav-label">→ الأقدم</span>
+              <span class="post-nav-title">{older.title}</span>
+            </a>
+          )}
+          {newer && (
+            <a class="is-newer" href={`/post/${newer.id}`} rel="next">
+              <span class="post-nav-label">الأحدث ←</span>
+              <span class="post-nav-title">{newer.title}</span>
+            </a>
+          )}
+        </nav>
+      )}
+    </footer>
   </article>
+
+  <script>
+    const bar = document.querySelector<HTMLElement>('[data-progress]');
+    const article = document.querySelector<HTMLElement>('[data-article]');
+
+    if (bar && article) {
+      let queued = false;
+
+      const update = () => {
+        queued = false;
+        const rect = article.getBoundingClientRect();
+        const scrollable = rect.height - window.innerHeight;
+        const progress = scrollable > 0 ? Math.min(1, Math.max(0, -rect.top / scrollable)) : 1;
+        bar.style.transform = `scaleX(${progress})`;
+      };
+
+      const request = () => {
+        if (queued) return;
+        queued = true;
+        requestAnimationFrame(update);
+      };
+
+      window.addEventListener('scroll', request, { passive: true });
+      window.addEventListener('resize', request);
+      update();
+    }
+  </script>
 </BaseLayout>
