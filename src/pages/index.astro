@@ -60,15 +60,15 @@ const categories = [...categoryCounts.entries()].sort(
 
     {featuredPost && (
       <a class="featured" href={`/post/${featuredPost.data.id}`}>
+        <h2>{featuredPost.data.titleAr || featuredPost.data.titleEn}</h2>
+        {featuredPost.data.excerptAr && <p class="featured-excerpt">{featuredPost.data.excerptAr}</p>}
         <div class="featured-top">
-          <span class="featured-badge">{featuredPost.data.locked ? 'أحدث مقال · محمي بكلمة مرور' : 'أحدث مقال'}</span>
           <time datetime={featuredPost.data.date}>{formatFull(featuredPost.data.date)}</time>
           <span aria-hidden="true">·</span>
           <span>{featuredPost.data.category}</span>
+          {featuredPost.data.locked && <span>محمي بكلمة مرور</span>}
         </div>
-        <h2>{featuredPost.data.titleAr || featuredPost.data.titleEn}</h2>
-        {featuredPost.data.excerptAr && <p class="featured-excerpt">{featuredPost.data.excerptAr}</p>}
-        <span class="featured-cta">اقرأ المقال <span class="arrow" aria-hidden="true">←</span></span>
+        <span class="featured-cta">اقرأ أحدث مقال <span class="arrow" aria-hidden="true">←</span></span>
       </a>
     )}
 
@@ -103,6 +103,10 @@ const categories = [...categoryCounts.entries()].sort(
             </time>
 
             <div class="row-main">
+              <h3>{post.data.titleAr || post.data.titleEn}</h3>
+
+              {post.data.excerptAr && <p class="row-excerpt">{post.data.excerptAr}</p>}
+
               <div class="row-kicker">
                 <span class="row-category">{post.data.category}</span>
                 <span>{readingTime(post.data.readingTimeMin)} للقراءة</span>
@@ -116,10 +120,6 @@ const categories = [...categoryCounts.entries()].sort(
                   </span>
                 )}
               </div>
-
-              <h3>{post.data.titleAr || post.data.titleEn}</h3>
-
-              {post.data.excerptAr && <p class="row-excerpt">{post.data.excerptAr}</p>}
 
               {post.data.tags.length > 0 && (
                 <ul class="tag-list" aria-label="الوسوم">

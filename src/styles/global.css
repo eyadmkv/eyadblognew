@@ -23,11 +23,11 @@
   --bg: #0e1116;
   --bg-raised: #151a21;
   --bg-sunken: #0a0d11;
-  --ink: #e9e7e0;
-  --ink-soft: #c3c4c2;
+  --ink: #e7e9ec;
+  --ink-soft: #c1c6cc;
   --muted: #8f95a0;
-  --ember: #e9e7e0; /* the accent is the ink itself */
-  --ember-soft: rgba(233, 231, 224, 0.08);
+  --ember: #e7e9ec; /* the accent is the ink itself */
+  --ember-soft: rgba(231, 233, 236, 0.08);
   --on-ember: #0e1116;
   --lamp: #f3d98b; /* the one lit thing */
 
@@ -431,6 +431,7 @@ html.hero-seen .hero-line--soft {
 }
 
 .featured-top {
+  margin-top: 1.25rem;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -439,17 +440,9 @@ html.hero-seen .hero-line--soft {
   font-size: var(--fs-s);
 }
 
-.featured-badge {
-  padding: 0 0.9rem;
-  border-radius: 999px;
-  background: var(--ink);
-  color: var(--bg);
-  font-weight: 600;
-}
-
 .featured h2 {
   max-width: 22ch;
-  margin-block: 1.1rem 0.9rem;
+  margin-block: 0 0.9rem;
   font-size: var(--fs-d);
   text-wrap: balance;
 }
@@ -583,6 +576,7 @@ html.hero-seen .hero-line--soft {
 }
 
 .row-kicker {
+  margin-bottom: 0.8rem;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -597,7 +591,7 @@ html.hero-seen .hero-line--soft {
 }
 
 .post-row h3 {
-  margin-block: 0.3rem 0.4rem;
+  margin-block: 0 0.4rem;
   font-size: var(--fs-h);
   line-height: 1.6;
   text-wrap: balance;
@@ -606,7 +600,7 @@ html.hero-seen .hero-line--soft {
 
 .row-excerpt {
   max-width: 44rem;
-  margin-bottom: 0.9rem;
+  margin-bottom: 0.6rem;
   color: var(--ink-soft);
   font-size: var(--fs-b);
   line-height: 2;
@@ -671,6 +665,7 @@ html.hero-seen .hero-line--soft {
 }
 
 .reader-kicker {
+  margin-bottom: 1.25rem;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -688,7 +683,7 @@ html.hero-seen .hero-line--soft {
 }
 
 .reader-header h1 {
-  margin-block: 1.25rem 1.1rem;
+  margin-block: 0 1.1rem;
   font-size: var(--fs-d);
   line-height: 1.5;
   text-wrap: balance;
@@ -697,6 +692,7 @@ html.hero-seen .hero-line--soft {
 
 .reader-excerpt {
   color: var(--ink-soft);
+  font-family: var(--font-display);
   font-size: var(--fs-p);
   line-height: 2.05;
   text-wrap: pretty;

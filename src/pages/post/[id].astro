@@ -112,14 +112,14 @@ const minutesLabel = (() => {
     <a class="back-link" href="/"><span class="arrow" aria-hidden="true">←</span> العودة إلى الأرشيف</a>
 
     <header class="reader-header">
+      <h1>{title}</h1>
+
       <div class="reader-kicker">
         <span class="reader-category">{post.data.category}</span>
         <time datetime={post.data.date}>{formattedDate}</time>
         <!--<span aria-hidden="true">·</span> -->
       <!--<span>{minutesLabel} للقراءة</span> -->       
       </div>
-
-      <h1>{title}</h1>
 
       {post.data.excerptAr && (
         <p class="reader-excerpt">{post.data.excerptAr}</p>
