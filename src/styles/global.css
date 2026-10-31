@@ -251,14 +251,6 @@ img {
   min-height: 2.75rem;
 }
 
-.brand-ember {
-  flex: none;
-  width: 0.6rem;
-  height: 0.6rem;
-  border-radius: 50%;
-  background: var(--lamp);
-}
-
 .brand-text {
   display: flex;
   flex-direction: column;
@@ -355,6 +347,7 @@ img {
 
 .hero-line {
   display: block;
+  width: fit-content;
 }
 
 .hero-line--soft {
@@ -364,6 +357,50 @@ img {
 
 .hero-stop {
   color: var(--lamp);
+}
+
+/* Hero motion: the headline is written in from the reading start, then the
+   second line, lit at first, slowly dims to its resting tone. The full stop
+   keeps its colour: the one thing that stays lit. Whole lines only, never
+   letters, because splitting Arabic breaks its joins. */
+@keyframes hero-write {
+  from {
+    clip-path: inset(-0.4em 0 -0.4em 100%);
+  }
+  to {
+    clip-path: inset(-0.4em 0 -0.4em 0);
+  }
+}
+
+@keyframes hero-dim {
+  from {
+    color: var(--ink);
+  }
+  to {
+    color: var(--muted);
+  }
+}
+
+.hero-line--soft {
+  animation: hero-dim 1.8s cubic-bezier(0.45, 0, 0.55, 1) 0.9s backwards;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero-line {
+    animation: hero-write 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s backwards;
+  }
+
+  .hero-line--soft {
+    animation:
+      hero-write 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.4s backwards,
+      hero-dim 1.8s cubic-bezier(0.45, 0, 0.55, 1) 0.9s backwards;
+  }
+}
+
+/* Already played this session: show the resting state at once. */
+html.hero-seen .hero-line,
+html.hero-seen .hero-line--soft {
+  animation: none;
 }
 
 .hero-lede {
@@ -744,9 +781,11 @@ img {
 }
 
 .prose hr {
-  height: 2rem;
-  margin-block: 2.5rem;
+  width: 3rem;
+  height: 3px;
+  margin: 2.5rem 0;
   border: 0;
+  background: var(--muted);
 }
 
 .prose img {

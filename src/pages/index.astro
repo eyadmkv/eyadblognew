@@ -35,20 +35,26 @@ const categories = [...categoryCounts.entries()].sort(
 
 <BaseLayout>
   <div class="container">
+    <script is:inline>
+      try {
+        if (sessionStorage.getItem('hero-played')) document.documentElement.classList.add('hero-seen');
+        else sessionStorage.setItem('hero-played', '1');
+      } catch (e) {}
+    </script>
     <section class="hero" aria-labelledby="home-title">
       <h1 id="home-title">
         <span class="hero-line">أكتب كي أرى</span>
         <span class="hero-line hero-line--soft">الأشياء على مهل<span class="hero-stop">.</span></span>
       </h1>
       <div class="hero-side">
-      <p class="hero-lede">
-        أنا إياد محمد حلمي. هذه مساحة للأفكار التي لا تستعجل إجاباتها؛
-        عن الإنسان، والتقنية، وتفاصيل الحياة التي تمرّ بنا كل يوم.
-      </p>
-      <div class="hero-actions">
-        <a class="btn btn-primary" href="#archive">اقرأ من الأرشيف <span class="arrow" aria-hidden="true">←</span></a>
-        <a class="btn btn-ghost" href="/about">من أنا؟</a>
-      </div>
+        <p class="hero-lede">
+          أنا إياد محمد حلمي. هذه مساحة للأفكار التي لا تستعجل إجاباتها؛
+          عن الإنسان، والتقنية، وتفاصيل الحياة التي تمرّ بنا كل يوم.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#archive">اقرأ من الأرشيف <span class="arrow" aria-hidden="true">←</span></a>
+          <a class="btn btn-ghost" href="/about">من أنا؟</a>
+        </div>
       </div>
     </section>
 
